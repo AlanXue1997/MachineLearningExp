@@ -1,4 +1,4 @@
-function h = plot_gaussian_ellipsoid(m, C, sdwidth, npts, axh)
+function h = plot_gaussian_ellipsoid(m, C, sdwidth, npts, axh, color)
 % PLOT_GAUSSIAN_ELLIPSOIDS plots 2-d and 3-d Gaussian distributions
 %
 % H = PLOT_GAUSSIAN_ELLIPSOIDS(M, C) plots the distribution specified by 
@@ -60,6 +60,7 @@ function h = plot_gaussian_ellipsoid(m, C, sdwidth, npts, axh)
 if ~exist('sdwidth', 'var'), sdwidth = 1; end
 if ~exist('npts', 'var'), npts = []; end
 if ~exist('axh', 'var'), axh = gca; end
+if ~exist('color', 'var'), color = [rand() rand() rand()]; end
 
 if numel(m) ~= length(m) 
     error('M must be a vector'); 
@@ -74,7 +75,7 @@ end
 set(axh, 'nextplot', 'add');
 
 switch numel(m)
-   case 2, h=show2d(m(:),C,sdwidth,npts,axh);
+   case 2, h=show2d(m(:),C,sdwidth,npts,axh,color);
    case 3, h=show3d(m(:),C,sdwidth,npts,axh);
    otherwise
       error('Unsupported dimensionality');
@@ -85,7 +86,7 @@ if nargout==0
 end
 
 %-----------------------------
-function h = show2d(means, C, sdwidth, npts, axh)
+function h = show2d(means, C, sdwidth, npts, axh, color)
 if isempty(npts), npts=50; end
 % plot the gaussian fits
 tt=linspace(0,2*pi,npts)';
@@ -94,7 +95,7 @@ ap = [x(:) y(:)]';
 [v,d]=eig(C); 
 d = sdwidth * sqrt(d); % convert variance to sdwidth*sd
 bp = (v*d*ap) + repmat(means, 1, size(ap,2)); 
-h = plot(bp(1,:), bp(2,:), '-', 'parent', axh);
+h = plot(bp(1,:), bp(2,:), '-', 'parent', axh, 'color', color);
 
 %-----------------------------
 function h = show3d(means, C, sdwidth, npts, axh)
