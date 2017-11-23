@@ -1,40 +1,21 @@
-figure(1),clf
-clear,clc
-dataColor=[204 204 204]/256;
-cluster1Color=[0 184 230]/256;
-cluster2Color=[255 166 33]/256;
-cluster3Color=[0 184 0]/256;
+clear,clf,clc;
 
-flagMax = 1000;
-epsilon = 1e-10;
-n = 1000;
 M = 3;
-d = 2;
-p = [10;10;50];
-mu = [0, 0; 10, 2; 4, -6];
-sigma(:,:,1) = [1, 0.2;
-                0.2, 3];
-sigma(:,:,2) = [1, 0.15;
-                0.15, 1];
-sigma(:,:,3) = [5, 2.2;
-                2.2, 2];
+epsilon = 1e-8;
+flagMax = 100;
 
-% plot_gaussian_ellipsoid(mu(3,:),sigma(:,:,3),2.447);
-% plot_gaussian_ellipsoid(mu(2,:),sigma(:,:,2),2.447);
-figure(1)
-hold on
-axis('equal')
- 
-data = GMM(n, p, mu, sigma);
-%display(data);
-scatter(data(:,1),data(:,2),10,dataColor);
-m = mu;
-m(1,:) = [0 0];
-m(2,:) = [0 1];
-m(3,:) = [2 2];
-s(:,:,1) = [1 0;0 1];
-s(:,:,2) = [1 0;0 1];
-s(:,:,3) = [1 0;0 1];
+data = importdata('iris.mat');
+X = data(:,1:end-1);
+y = data(:,end);
+
+[n,d]= size(X);
+
+m(1,:) = [5 3 1 0];
+m(2,:) = [6 3 4 1];
+m(3,:) = [7 3 4 2];
+s(:,:,1) = eye(4);
+s(:,:,2) = eye(4);
+s(:,:,3) = eye(4);
 m0 = zeros(M,d,flagMax);
 % m0(1,:) = [0 0];
 % m0(2,:) = [0 0];
@@ -50,8 +31,8 @@ while true
     flag = flag+1;
     m0(:,:,flag) = m;
     s0(:,:,:,flag) = s;
-    p(:,:,flag) = Mstep(data(:,1:2), m, s);
-    [m, s] = Estep(data(:,1:2), p(:,:,flag));
+    p(:,:,flag) = Mstep(X, m, s);
+    [m, s] = Estep(X, p(:,:,flag));
 %     plot_gaussian_ellipsoid(m(3,:),s(:,:,3),2.447,[],gca,1+(cluster1Color-1)/flag);
 %     plot_gaussian_ellipsoid(m(2,:),s(:,:,2),2.447,[],gca,cluster2Color/flag);
 %     plot_gaussian_ellipsoid(m(1,:),s(:,:,1),2.447,[],gca,cluster3Color/flag);
@@ -65,21 +46,15 @@ while true
     end
 end
 
-y = data(:,end);
 l = zeros(n,1);
 fmeasure = zeros(flag,1);
 for i=1:flag
-    plot_gaussian_ellipsoid(m0(3,:,i),s0(:,:,3,i),2.447,[],gca,cluster1Color+0.9*(1-cluster1Color)*(flag-i)/flag);
-    plot_gaussian_ellipsoid(m0(2,:,i),s0(:,:,2,i),2.447,[],gca,cluster2Color+0.9*(1-cluster2Color)*(flag-i)/flag);
-    plot_gaussian_ellipsoid(m0(1,:,i),s0(:,:,1,i),2.447,[],gca,cluster3Color+0.9*(1-cluster3Color)*(flag-i)/flag);
-    drawnow
     l(max(p(:,:,i),[],2)==p(:,1,i)) = 1;
     l(max(p(:,:,i),[],2)==p(:,2,i)) = 2;
     l(max(p(:,:,i),[],2)==p(:,3,i)) = 3;
     fmeasure(i) = Fmeasure(y,l);
 end
-hold off
-figure(2)
+
 plot(1:flag,fmeasure, 'color', [1 0 1]);
 axis([1,flag+1,0.5,1])
 
